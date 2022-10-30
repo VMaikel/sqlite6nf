@@ -1,26 +1,26 @@
 # Overview
 
-Sqlite6nf is an extension to the standard sqlite3 module adding built-in support for tables in 6th normal form
+sqlite6nf is an extension to the standard sqlite3 module adding built-in support for tables in 6th normal form
 (6nf from now on). A table in 6nf has each non-primary key column split into a separate table. These new tables
 can then be made temporal by adding meta columns containing timestamps. Furthermore, temporality requires
 records to be only added, but never changed or deleted. Temporal tables allow data to be seen as it was during
-different moments in time, instead of only showing the latest state of the database. Sqlite6nf adds temporal
+different moments in time, instead of only showing the latest state of the database. sqlite6nf adds temporal
 support for both table structure (tables and columns) and table content (records).
 
 # Issues
 
-Please be aware that sqlite6nf is currently in a development phase. Many of its features are currently still
-untested, incomplete or missing. During the development phase no attempt is made to remain compatible with
-previous versions. Using sqlite6nf in its current state could create issues later on for a database. Once
-sqlite6nf reaches the production phase in version 1.0 all future versions will be made compatible with it.
+sqlite6nf is currently in a development phase. Many of its features are currently still untested, incomplete or
+missing. During the development phase no attempt is made to remain compatible with previous versions. Using
+sqlite6nf in its current state could create issues later on for a database. Once sqlite6nf reaches the
+production phase in version 1.0 all future versions will be made compatible with it.
 
 Below are all features which are currently untested, incomplete or missing. Once all these issues are closed,
-production version 1.0 will have been reached.
+production version 1.0 is reached.
 
 * Documentation
 	- [ ] [#1 Expand the description of README and the module docstring.](https://github.com/VMaikel/sqlite6nf/issues/1)
-	- [ ] [#2 Add docstrings and comments to the sqlite query constants.](https://github.com/VMaikel/sqlite6nf/issues/2)
-	- [ ] [#3 Add docstrings and comments to the regex pattern constants.](https://github.com/VMaikel/sqlite6nf/issues/3)
+	- [ ] [#2 Add docstrings and comments to the SQLite query constants.](https://github.com/VMaikel/sqlite6nf/issues/2)
+	- [x] [#3 Add docstrings and comments to the regex pattern constants.](https://github.com/VMaikel/sqlite6nf/issues/3)
 	- [ ] [#4 Add docstrings and comments to the Python functions and classes.](https://github.com/VMaikel/sqlite6nf/issues/4)
 * Bugs
 	- [ ] [#5 Cursor.normalise() does not validate the tables argument.](https://github.com/VMaikel/sqlite6nf/issues/5)
