@@ -29,47 +29,52 @@ production phase in version 1.0 all future versions will be made compatible with
 Below are all features which are currently untested, incomplete or missing. Once all these issues are closed,
 production version 1.0 is reached.
     * Documentation
-        [ ] #1 Expand the description of README and the module docstring.
-        [ ] #2 Add docstrings and comments to the SQLite query constants.
-        [x] #3 Add docstrings and comments to the regex pattern constants.
-        [ ] #4 Add docstrings and comments to the Python functions and classes.
+        [ ] Expand the description of README and the module docstring. #1
+        [ ] Add docstrings and comments to the SQLite query constants. #2
+        [x] Add docstrings and comments to the regex pattern constants. #3
+        [ ] Add docstrings and comments to the Python functions and classes. #4
+        [ ] Add proper repository structure. #32
+        [x] Add the .gitignore file. #33
+        [ ] Add licensing information. #34
+        [ ] Add unit tests. #35
+        [ ] Add code samples. #36
     * Bugs
-        [ ] #5 Cursor.normalise() does not validate the tables argument.
-        [ ] #6 Shadow tables are not populated with initial values.
-        [ ] #7 Transaction time is not consistently calculated.
+        [ ] Cursor.normalise() does not validate the tables argument. #5
+        [ ] Shadow tables are not populated with initial values. #6
+        [ ] Transaction time is not consistently calculated. #7
     * Questions
-        [ ] #8 Verify SQL injection safety.
-        [ ] #9 Verify proper case (insensitivity) handling of SQLite queries.
-        [ ] #10 Verify proper Unicode handling of SQLite queries.
-        [ ] #11 Verify proper transaction and savepoint handling.
-        [ ] #12 Verify whether sqlite3 aliases should use single or double quotes.
-        [ ] #13 Verify proper handling of tables without rowid.
-        [ ] #14 Verify proper handling of tables with a multi-column primary key.
-        [ ] #15 Verify if the ‘VACUUM’ statement causes issues with the used rowid values.
+        [ ] Verify SQL injection safety. #8
+        [ ] Verify proper case (insensitivity) handling of SQLite queries. #9
+        [ ] Verify proper Unicode handling of SQLite queries. #10
+        [ ] Verify proper transaction and savepoint handling. #11
+        [ ] Verify whether sqlite3 aliases should use single or double quotes. #12
+        [ ] Verify proper handling of tables without rowid. #13
+        [ ] Verify proper handling of tables with a multi-column primary key. #14
+        [ ] Verify if the ‘VACUUM’ statement causes issues with the used rowid values. #15
     * Enhancements
-        [ ] #16 Add support for selecting records.
-        [ ] #17 Add support for altering tables.
-        [ ] #18 Add support for dropping tables.
-        [ ] #19 Add support for temporary tables.
-        [ ] #20 Add support for virtual tables
-        [ ] #21 Add support for creating views.
-        [ ] #22 Add support for dropping views.
-        [ ] #23 Add support for temporary views.
-        [ ] #24 Add support for attaching and detaching databases.
-        [ ] #25 Add support for join statements which use a comma (,) instead of the keyword 'JOIN'.
-        [ ] #26 Add support for record changes from within triggers when recursive triggers are disabled.
-        [ ] #27 Add support for temporal criteria from within queries.
-        [ ] #28 Add support for user defined Connection and Cursor objects.
-        [ ] #29 Add support for user defined meta-columns.
-        [ ] #30 Add support for table normalisation on a per-column basis.
-        [ ] #31 Add support for deleting old historized data.
+        [ ] Add support for selecting records. #16
+        [ ] Add support for altering tables. #17
+        [ ] Add support for dropping tables. #18
+        [ ] Add support for temporary tables. #19
+        [ ] Add support for virtual tables #20
+        [ ] Add support for creating views. #21
+        [ ] Add support for dropping views. #22
+        [ ] Add support for temporary views. #23
+        [ ] Add support for attaching and detaching databases. #24
+        [ ] Add support for join statements which use a comma (,) instead of the keyword 'JOIN'. #25
+        [ ] Add support for record changes from within triggers when recursive triggers are disabled. #26
+        [ ] Add support for temporal criteria from within queries. #27
+        [ ] Add support for user defined Connection and Cursor objects. #28
+        [ ] Add support for user defined meta-columns. #29
+        [ ] Add support for table normalisation on a per-column basis. #30
+        [ ] Add support for deleting old historized data. #31
 """
 
 
 __author__ = 'Maikel Verbeek'
 __copyright__ = 'Copyright (C) 2022 Maikel Verbeek'
-__version__ = '0.1.2'
-__date__ = '2022/10/30'
+__version__ = '0.1.3'
+__date__ = '2022/10/31'
 __status__ = 'Development'
 
 
