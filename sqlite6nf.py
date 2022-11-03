@@ -73,8 +73,8 @@ production version 1.0 is reached.
 
 __author__ = 'Maikel Verbeek'
 __copyright__ = 'Copyright (C) 2022 Maikel Verbeek'
-__version__ = '0.1.3'
-__date__ = '2022/10/31'
+__version__ = '0.1.4'
+__date__ = '2022/11/03'
 __status__ = 'Development'
 
 
@@ -311,15 +311,15 @@ Comments (single and multiline) and quotes (single, double, square bracket and g
 as a single segment. Single quotes, double quotes and grave accents cannot be closed by an even number of
 characters of the same type in a row.
 
-The pattern constants loosely fellow the structure below:
-    * Ignore: Any part which is not used by sqlite6nf.
-        * Space: Any part which is ignored by the SQLite interpreter.
-            * Comment: Single and multiline comments.
-    * Object: A complete reference to a table object.
-        * Identifier: Any part which is recognised by the sqlite interpreter as a standalone name.
-    * Query: SQLite queries which are analysed by sqlite6nf.
-        * Simulate: Query parts which are used to trigger additional query executions. 
-        * Substitute: Query parts which are changed to support the additional features.
+The pattern constants loosely follow the structure below:
+├── Ignore: Any part which is not used by sqlite6nf.
+│   └── Space: Any part which is ignored by the SQLite interpreter.
+│       └── Comment: Single and multiline comments.
+├── Object: A complete reference to a table object.
+│   └── Identifier: Any part which is recognised by the sqlite interpreter as a standalone name.
+└── Query: SQLite queries which are analysed by sqlite6nf.
+    ├── Simulate: Query parts which are used to trigger additional query executions. 
+    └── Substitute: Query parts which are changed to support the additional features.
 
 
 Below are all parts which are currently incomplete or missing in the pattern constants. These issues will be
@@ -350,6 +350,9 @@ _PATTERN_SPACE = re.compile(rf'''(?x:
     )''')
 # Identifiers with single quotes, double quotes or grave accents can only be closed by an odd number of
 # characters of the same type in a row.
+# If a quoted identifier is not closed, SQLite will throw an operational error. In order to avoid the regex
+# pattern matching from mixing up the quoted and unquoted parts in these cases, the '$' sign has been added as
+# a substitute for a closing quote.
 _PATTERN_IDENTIFIER_SINGLE_QUOTE = re.compile(r'''(?x:
     '  # Open
     (?P<identifier_single_quote>(?s:.*?)[^'](?:'{2})*)  # Identifier
@@ -464,7 +467,7 @@ _PATTERN_QUERY_ATTACH_DATABASE = re.compile(_PATTERN_QUERY_RENAME.sub('attach_da
 _PATTERN_QUERY_DETACH_DATABASE = re.compile(rf'''(?x:(?P<query>
     {_PATTERN_QUERY_OPEN.pattern}  # Open
     {_PATTERN_SPACE.pattern}*?(?i:DETACH)  # Detach
-    (:{_PATTERN_SPACE.pattern}+?(?i:DATABASE))?  # Database
+    (?:{_PATTERN_SPACE.pattern}+?(?i:DATABASE))?  # Database
     {_PATTERN_SPACE.pattern}*?{_PATTERN_OBJECT_SCHEMA.pattern}  # Schema
     ))''')
 _PATTERN_QUERY_DETACH_DATABASE = re.compile(_PATTERN_QUERY_RENAME.sub('detach_database_',
@@ -476,7 +479,9 @@ _PATTERN_QUERY_DETACH_DATABASE = re.compile(_PATTERN_QUERY_RENAME.sub('detach_da
 _PATTERN_QUERY_SELECT_FROM = re.compile(rf'''(?x:(?P<query>
     (?<![0-9A-Z_a-z])  # Open
     (?i:FROM|JOIN)(?:{_PATTERN_SPACE.pattern}|\()*?  # From/join
+    (?!(?i:WITH|SELECT)(?![0-9A-Z_a-z])) # Not a subquery
     {_PATTERN_OBJECT.pattern}  # Object
+    (?!{_PATTERN_SPACE.pattern}*?\() # Not a function
     ))''')
 _PATTERN_QUERY_SELECT_FROM = re.compile(_PATTERN_QUERY_RENAME.sub('select_from_', _PATTERN_QUERY_SELECT_FROM.pattern))
 _PATTERN_SIMULATE = re.compile(rf'''(?x:
