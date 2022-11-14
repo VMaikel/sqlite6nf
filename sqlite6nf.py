@@ -28,8 +28,8 @@ production phase in version 1.0 all future versions will be made compatible with
 
 __author__ = 'Maikel Verbeek'
 __copyright__ = 'Copyright (C) 2022 Maikel Verbeek'
-__version__ = '0.1.4'
-__date__ = '2022/11/03'
+__version__ = '0.2.0'
+__date__ = '2022/11/14'
 __status__ = 'Development'
 
 
@@ -263,7 +263,7 @@ Apart from where necessary for identification, no syntactic verification is done
 that sqlite3 will catch any invalid syntax and exit execution accordingly.
 
 Comments (single and multiline) and quotes (single, double, square bracket and grave accent) are each treated
-as a single segment. Single quotes, double quotes and grave accents cannot be closed by an even number of
+as a single segment. Single quotes, double quotes and grave accents can only be closed by an odd number of
 characters of the same type in a row.
 
 The pattern constants loosely follow the structure below:
@@ -273,8 +273,6 @@ The pattern constants loosely follow the structure below:
 ├── Object: A complete reference to a table object.
 │   └── Identifier: Any part which is recognised by the sqlite interpreter as a standalone name.
 └── Query: SQLite queries which are analysed by sqlite6nf.
-    ├── Simulate: Query parts which are used to trigger additional query executions. 
-    └── Substitute: Query parts which are changed to support the additional features.
 
 
 Below are all parts which are currently incomplete or missing in the pattern constants. These issues will be
@@ -358,15 +356,13 @@ _PATTERN_IGNORE = re.compile(rf'''(?x:
 _PATTERN_IGNORE = re.compile(re.sub(r'\(\?P<(?s:.*?)>', '(?:', _PATTERN_IGNORE.pattern))
 # Change all unnamed capturing groups to non-capturing groups.
 _PATTERN_IGNORE = re.compile(re.sub(r'\((?!\?)', '(?:', _PATTERN_IGNORE.pattern))
-# A pattern which is used to prefix all named capturing groups. This is required in order to avoid naming
-# conflicts when combining multiple query patterns.
-_PATTERN_QUERY_RENAME = re.compile(r'(?<=\(\?P<)')
-# Queries open either at the start of the string or after a previous query is terminated by a semicolon.
-_PATTERN_QUERY_OPEN = re.compile(rf'''(?x:
-    (?<=^)|(?<=;)
+# '^' and ';' have a different length (0 and 1 respectively) and therefore need a separate lookbehind.
+_PATTERN_QUERY = re.compile(rf'''(?x:
+    (?<=^)|(?<=;)  # Open
+    {_PATTERN_IGNORE}*?  # Query
+    (?:;|$)  # Close
     )''')
 _PATTERN_QUERY_CREATE_TABLE = re.compile(rf'''(?x:(?P<query>
-    {_PATTERN_QUERY_OPEN.pattern}  # Open
     {_PATTERN_SPACE.pattern}*?(?i:CREATE)  # Create
     (?:{_PATTERN_SPACE.pattern}+?(?P<temporary>(?i:TEMP|TEMPORARY)))?  # Temporary
     {_PATTERN_SPACE.pattern}+?(?i:TABLE)  # Table
@@ -374,27 +370,20 @@ _PATTERN_QUERY_CREATE_TABLE = re.compile(rf'''(?x:(?P<query>
     (?:{_PATTERN_SPACE.pattern}+?(?i:IF){_PATTERN_SPACE.pattern}+?(?i:NOT){_PATTERN_SPACE.pattern}+?(?i:EXISTS))?
     {_PATTERN_SPACE.pattern}*?{_PATTERN_OBJECT.pattern}  # Object
     ))''')
-_PATTERN_QUERY_CREATE_TABLE = re.compile(_PATTERN_QUERY_RENAME.sub('create_table_',
-                                                                   _PATTERN_QUERY_CREATE_TABLE.pattern))
 # At the moment the 'alter_table' pattern is missing the 'RENAME TO', 'RENAME COLUMN TO', 'ADD COLUMN' and
 # 'DROP COLUMN' query segments.
 _PATTERN_QUERY_ALTER_TABLE = re.compile(rf'''(?x:(?P<query>
-    {_PATTERN_QUERY_OPEN.pattern}  # Open
     {_PATTERN_SPACE.pattern}*?(?i:ALTER){_PATTERN_SPACE.pattern}+?(?i:TABLE)  # Alter table
     {_PATTERN_SPACE.pattern}*?{_PATTERN_OBJECT.pattern}  # Object
     # TBA
     ))''')
-_PATTERN_QUERY_ALTER_TABLE = re.compile(_PATTERN_QUERY_RENAME.sub('alter_table_', _PATTERN_QUERY_ALTER_TABLE.pattern))
 # The 'DROP TABLE' query can also be used on virtual tables.
 _PATTERN_QUERY_DROP_TABLE = re.compile(rf'''(?x:(?P<query>
-    {_PATTERN_QUERY_OPEN.pattern}  # Open
     {_PATTERN_SPACE.pattern}*?(?i:DROP){_PATTERN_SPACE.pattern}+?(?i:TABLE)  # Drop table
     (?:{_PATTERN_SPACE.pattern}+?(?i:IF){_PATTERN_SPACE.pattern}+?(?i:EXISTS))?  # If exists
     {_PATTERN_SPACE.pattern}*?{_PATTERN_OBJECT.pattern}  # Object
     ))''')
-_PATTERN_QUERY_DROP_TABLE = re.compile(_PATTERN_QUERY_RENAME.sub('drop_table_', _PATTERN_QUERY_DROP_TABLE.pattern))
 _PATTERN_QUERY_CREATE_VIEW = re.compile(rf'''(?x:(?P<query>
-    {_PATTERN_QUERY_OPEN.pattern}  # Open
     {_PATTERN_SPACE.pattern}*?(?i:CREATE)  # Create
     (?:{_PATTERN_SPACE.pattern}+?(?P<temporary>(?i:TEMP|TEMPORARY)))?  # Temporary
     {_PATTERN_SPACE.pattern}+?(?i:VIEW)  # View
@@ -402,53 +391,33 @@ _PATTERN_QUERY_CREATE_VIEW = re.compile(rf'''(?x:(?P<query>
     (?:{_PATTERN_SPACE.pattern}+?(?i:IF){_PATTERN_SPACE.pattern}+?(?i:NOT){_PATTERN_SPACE.pattern}+?(?i:EXISTS))?
     {_PATTERN_SPACE.pattern}*?{_PATTERN_OBJECT.pattern}  # Object
     ))''')
-_PATTERN_QUERY_CREATE_VIEW = re.compile(_PATTERN_QUERY_RENAME.sub('create_view_', _PATTERN_QUERY_CREATE_VIEW.pattern))
 _PATTERN_QUERY_DROP_VIEW = re.compile(rf'''(?x:(?P<query>
-    {_PATTERN_QUERY_OPEN.pattern}  # Open
     {_PATTERN_SPACE.pattern}*?(?i:DROP){_PATTERN_SPACE.pattern}+?(?i:VIEW)  # Drop view
     (?:{_PATTERN_SPACE.pattern}+?(?i:IF){_PATTERN_SPACE.pattern}+?(?i:EXISTS))?  # If exists
     {_PATTERN_SPACE.pattern}*?{_PATTERN_OBJECT.pattern}  # Object
     ))''')
-_PATTERN_QUERY_DROP_VIEW = re.compile(_PATTERN_QUERY_RENAME.sub('drop_view_', _PATTERN_QUERY_DROP_VIEW.pattern))
 # At the moment the 'attach_database' pattern is missing the 'schema' query segment.
 _PATTERN_QUERY_ATTACH_DATABASE = re.compile(rf'''(?x:(?P<query>
-    {_PATTERN_QUERY_OPEN.pattern}  # Open
     {_PATTERN_SPACE.pattern}*?(?i:ATTACH)  # Attach
     {_PATTERN_SPACE.pattern}+?(?i:DATABASE)  # Database
     {_PATTERN_SPACE.pattern}+?  # TBA
     ))''')
-_PATTERN_QUERY_ATTACH_DATABASE = re.compile(_PATTERN_QUERY_RENAME.sub('attach_database_',
-                                                                      _PATTERN_QUERY_ATTACH_DATABASE.pattern))
 _PATTERN_QUERY_DETACH_DATABASE = re.compile(rf'''(?x:(?P<query>
-    {_PATTERN_QUERY_OPEN.pattern}  # Open
     {_PATTERN_SPACE.pattern}*?(?i:DETACH)  # Detach
     (?:{_PATTERN_SPACE.pattern}+?(?i:DATABASE))?  # Database
     {_PATTERN_SPACE.pattern}*?{_PATTERN_OBJECT_SCHEMA.pattern}  # Schema
     ))''')
-_PATTERN_QUERY_DETACH_DATABASE = re.compile(_PATTERN_QUERY_RENAME.sub('detach_database_',
-                                                                      _PATTERN_QUERY_DETACH_DATABASE.pattern))
 # The 'select_from' pattern contains both 'FROM object' and 'JOIN object' query segments.
 # An object may be proceeded by an unlimited amount of opening round brackets.
 # At the moment the 'select_from' pattern is missing the 'JOIN object' query segment which use a comma instead
 # of the keyword 'JOIN'.
 _PATTERN_QUERY_SELECT_FROM = re.compile(rf'''(?x:(?P<query>
-    (?<![0-9A-Z_a-z])  # Open
-    (?i:FROM|JOIN)(?:{_PATTERN_SPACE.pattern}|\()*?  # From/join
+    (?<![0-9A-Z_a-z])(?i:FROM|JOIN)  # From/join
+    (?:{_PATTERN_SPACE.pattern}|\()*?  # Opening brackets
     (?!(?i:WITH|SELECT)(?![0-9A-Z_a-z])) # Not a subquery
     {_PATTERN_OBJECT.pattern}  # Object
     (?!{_PATTERN_SPACE.pattern}*?\() # Not a function
     ))''')
-_PATTERN_QUERY_SELECT_FROM = re.compile(_PATTERN_QUERY_RENAME.sub('select_from_', _PATTERN_QUERY_SELECT_FROM.pattern))
-_PATTERN_SIMULATE = re.compile(rf'''(?x:
-    {_PATTERN_IGNORE.pattern}*?  # Open
-    (?:{_PATTERN_QUERY_CREATE_TABLE.pattern}|{_PATTERN_QUERY_ALTER_TABLE.pattern}|{_PATTERN_QUERY_DROP_TABLE.pattern}
-        |{_PATTERN_QUERY_CREATE_VIEW.pattern}|{_PATTERN_QUERY_DROP_VIEW.pattern}
-        |{_PATTERN_QUERY_ATTACH_DATABASE.pattern}|{_PATTERN_QUERY_DETACH_DATABASE.pattern}|$)  # Query
-    )''')
-_PATTERN_SUBSTITUTE = re.compile(rf'''(?x:
-    {_PATTERN_IGNORE.pattern}*?  # Open
-    (?:{_PATTERN_QUERY_SELECT_FROM.pattern}|$)  # Query
-    )''')
 
 
 class Cursor(sqlite3.Cursor):
@@ -460,8 +429,6 @@ class Cursor(sqlite3.Cursor):
             *,
             transaction: Optional[date] = None,
             ) -> Cursor:
-        self.simulate(sql, transaction)
-        sql = self.substitute(sql, transaction)
         cursor = super().execute(sql, parameters)
         return cursor
 
@@ -473,8 +440,6 @@ class Cursor(sqlite3.Cursor):
             *,
             transaction: Optional[date] = None,
             ) -> sqlite3.Cursor:
-        self.simulate(sql, transaction)
-        sql = self.substitute(sql, transaction)
         cursor = super().executemany(sql, parameters)
         return cursor
 
@@ -485,47 +450,8 @@ class Cursor(sqlite3.Cursor):
             *,
             transaction: Optional[date] = None,
             ) -> sqlite3.Cursor:
-        self.simulate(sql_script, transaction)
-        sql_script = self.substitute(sql_script, transaction)
         cursor = super().executescript(sql_script)
         return cursor
-
-    def simulate(
-            self: 'Cursor',
-            sql: str,
-            transaction: Optional[date] = None,
-            ) -> None:
-        matches = re.finditer(_PATTERN_SIMULATE, sql)
-        for match in matches:
-            if match:
-                if match.group('create_table_query'):
-                    pass
-                elif match.group('alter_table_query'):
-                    pass
-                elif match.group('drop_table_query'):
-                    pass
-                elif match.group('create_view_query'):
-                    pass
-                elif match.group('drop_view_query'):
-                    pass
-                elif match.group('attach_database_query'):
-                    pass
-                elif match.group('detach_database_query'):
-                    pass
-        return
-
-    def substitute(
-            self: 'Cursor',
-            sql: str,
-            transaction: Optional[date] = None,
-            ) -> str:
-        if transaction:
-            matches = re.finditer(_PATTERN_SUBSTITUTE, sql)
-            for match in reversed(list(matches)):
-                if match:
-                    if match.group('select_from_query'):
-                        pass
-        return sql
 
 
 class Connection(sqlite3.Connection):
@@ -535,24 +461,6 @@ class Connection(sqlite3.Connection):
             ) -> 'Cursor':
         cursor = super().cursor(factory)
         return cursor
-
-    def simulate(
-            self: 'Connection',
-            sql: str,
-            transaction: Optional[date] = None,
-            ) -> None:
-        cursor = self.cursor()
-        cursor.simulate(sql, transaction)
-        return
-
-    def substitute(
-            self: 'Connection',
-            sql: str,
-            transaction: Optional[date] = None,
-            ) -> str:
-        cursor = self.cursor()
-        sql = cursor.substitute(sql, transaction)
-        return sql
 
     def normalize(
             self: 'Connection',
