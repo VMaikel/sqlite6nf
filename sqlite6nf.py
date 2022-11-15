@@ -358,8 +358,8 @@ _PATTERN_IGNORE = re.compile(re.sub(r'\(\?P<(?s:.*?)>', '(?:', _PATTERN_IGNORE.p
 _PATTERN_IGNORE = re.compile(re.sub(r'\((?!\?)', '(?:', _PATTERN_IGNORE.pattern))
 # '^' and ';' have a different length (0 and 1 respectively) and therefore need a separate lookbehind.
 _PATTERN_QUERY = re.compile(rf'''(?x:
-    (?<=^)|(?<=;)  # Open
-    {_PATTERN_IGNORE}*?  # Query
+    (?:(?<=^)|(?<=;))  # Open
+    {_PATTERN_IGNORE.pattern}*?  # Query
     (?:;|$)  # Close
     )''')
 _PATTERN_QUERY_CREATE_TABLE = re.compile(rf'''(?x:(?P<query>
