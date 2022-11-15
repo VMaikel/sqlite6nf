@@ -28,8 +28,8 @@ production phase in version 1.0 all future versions will be made compatible with
 
 __author__ = 'Maikel Verbeek'
 __copyright__ = 'Copyright (C) 2022 Maikel Verbeek'
-__version__ = '0.2.0'
-__date__ = '2022/11/14'
+__version__ = '0.2.2'
+__date__ = '2022/11/15'
 __status__ = 'Development'
 
 
@@ -429,8 +429,8 @@ class Cursor(sqlite3.Cursor):
             *,
             transaction: Optional[date] = None,
             ) -> Cursor:
-        cursor = super().execute(sql, parameters)
-        return cursor
+        super().execute(sql, parameters)
+        return self
 
     def executemany(
             self: 'Cursor',
@@ -440,8 +440,8 @@ class Cursor(sqlite3.Cursor):
             *,
             transaction: Optional[date] = None,
             ) -> sqlite3.Cursor:
-        cursor = super().executemany(sql, parameters)
-        return cursor
+        super().executemany(sql, parameters)
+        return self
 
     def executescript(
             self: 'Cursor',
@@ -450,8 +450,8 @@ class Cursor(sqlite3.Cursor):
             *,
             transaction: Optional[date] = None,
             ) -> sqlite3.Cursor:
-        cursor = super().executescript(sql_script)
-        return cursor
+        super().executescript(sql_script)
+        return self
 
 
 class Connection(sqlite3.Connection):
