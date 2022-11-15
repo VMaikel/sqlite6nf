@@ -28,7 +28,7 @@ production phase in version 1.0 all future versions will be made compatible with
 
 __author__ = 'Maikel Verbeek'
 __copyright__ = 'Copyright (C) 2022 Maikel Verbeek'
-__version__ = '0.2.2'
+__version__ = '0.2.4'
 __date__ = '2022/11/15'
 __status__ = 'Development'
 
@@ -426,7 +426,7 @@ class Cursor(sqlite3.Cursor):
             sql: str,
             parameters: Union[Sequence[Any], Mapping[str, Any]] = (),
             /,
-            ) -> Cursor:
+            ) -> 'Cursor':
         super().execute(sql, parameters)
         return self
 
@@ -435,7 +435,7 @@ class Cursor(sqlite3.Cursor):
             sql: str,
             parameters: Union[Sequence[Any], Mapping[str, Any], Iterator[Any]],
             /,
-            ) -> sqlite3.Cursor:
+            ) -> 'Cursor':
         super().executemany(sql, parameters)
         return self
 
@@ -443,7 +443,7 @@ class Cursor(sqlite3.Cursor):
             self: 'Cursor',
             sql_script: str,
             /,
-            ) -> sqlite3.Cursor:
+            ) -> 'Cursor':
         super().executescript(sql_script)
         return self
 
@@ -454,6 +454,35 @@ class Connection(sqlite3.Connection):
             factory: Type['Cursor'] = Cursor,
             ) -> 'Cursor':
         cursor = super().cursor(factory)
+        return cursor
+
+    def execute(
+            self: 'Connection',
+            sql: str,
+            parameters: Union[Sequence[Any], Mapping[str, Any]] = (),
+            /,
+            ) -> 'Cursor':
+        cursor = self.cursor()
+        cursor.execute(sql, parameters)
+        return cursor
+
+    def executemany(
+            self: 'Connection',
+            sql: str,
+            parameters: Union[Sequence[Any], Mapping[str, Any], Iterator[Any]],
+            /,
+            ) -> 'Cursor':
+        cursor = self.cursor()
+        cursor.executemany(sql, parameters)
+        return cursor
+
+    def executescript(
+            self: 'Connection',
+            sql_script: str,
+            /,
+            ) -> 'Cursor':
+        cursor = self.cursor()
+        cursor.executescript(sql_script)
         return cursor
 
     def normalize(
