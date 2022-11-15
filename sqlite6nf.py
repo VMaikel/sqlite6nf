@@ -426,8 +426,6 @@ class Cursor(sqlite3.Cursor):
             sql: str,
             parameters: Union[Sequence[Any], Mapping[str, Any]] = (),
             /,
-            *,
-            transaction: Optional[date] = None,
             ) -> Cursor:
         super().execute(sql, parameters)
         return self
@@ -437,8 +435,6 @@ class Cursor(sqlite3.Cursor):
             sql: str,
             parameters: Union[Sequence[Any], Mapping[str, Any], Iterator[Any]],
             /,
-            *,
-            transaction: Optional[date] = None,
             ) -> sqlite3.Cursor:
         super().executemany(sql, parameters)
         return self
@@ -447,8 +443,6 @@ class Cursor(sqlite3.Cursor):
             self: 'Cursor',
             sql_script: str,
             /,
-            *,
-            transaction: Optional[date] = None,
             ) -> sqlite3.Cursor:
         super().executescript(sql_script)
         return self
